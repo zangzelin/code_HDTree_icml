@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HDTree | ICML Reproducibility Release</title>
+  <meta name="description" content="HDTree minimal public release for reproducing the MNIST and Limb ICML experiments, with code, checkpoints, logs, and reproducibility commands.">
+  <style>
+    :root {
+      --bg: #f7f8f4;
+      --panel: #ffffff;
+      --ink: #151713;
+      --muted: #5b6256;
+      --line: #dfe4d8;
+      --accent: #237363;
+      --accent-2: #9b5e2e;
+      --soft: #e8f1eb;
+      --soft-2: #f3eadf;
+      --code: #20251f;
+      --shadow: 0 18px 48px rgba(21, 23, 19, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-bottom: 1px solid rgba(223, 228, 216, 0.9);
+      background: rgba(247, 248, 244, 0.92);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 760;
+      letter-spacing: 0;
+      text-decoration: none;
+    }
+
+    .mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .links a {
+      text-decoration: none;
+    }
+
+    .hero {
+      padding: 78px 0 48px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 48px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 760;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 14px 0 18px;
+      max-width: 780px;
+      font-size: clamp(44px, 7vw, 82px);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 19px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 14px;
+      font-weight: 720;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .button.primary {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .visual {
+      min-height: 420px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(160deg, #ffffff 0%, #eef5ef 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .tree-canvas {
+      position: relative;
+      height: 278px;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(35, 115, 99, 0.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(35, 115, 99, 0.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      overflow: hidden;
+    }
+
+    .branch {
+      position: absolute;
+      height: 2px;
+      background: rgba(35, 115, 99, 0.42);
+      transform-origin: left center;
+    }
+
+    .b1 { left: 154px; top: 74px; width: 96px; transform: rotate(-26deg); }
+    .b2 { left: 154px; top: 75px; width: 102px; transform: rotate(22deg); }
+    .b3 { left: 260px; top: 31px; width: 82px; transform: rotate(18deg); }
+    .b4 { left: 260px; top: 120px; width: 82px; transform: rotate(-16deg); }
+    .b5 { left: 350px; top: 61px; width: 92px; transform: rotate(24deg); }
+    .b6 { left: 348px; top: 95px; width: 98px; transform: rotate(-21deg); }
+
+    .node {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      min-width: 66px;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid rgba(35, 115, 99, 0.28);
+      border-radius: 8px;
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.92);
+      font-size: 12px;
+      font-weight: 760;
+      box-shadow: 0 8px 24px rgba(35, 115, 99, 0.08);
+    }
+
+    .n0 { left: 82px; top: 58px; }
+    .n1 { left: 236px; top: 12px; }
+    .n2 { left: 236px; top: 104px; }
+    .n3 { left: 342px; top: 45px; }
+    .n4 { left: 342px; top: 140px; }
+    .n5 { right: 22px; top: 82px; color: var(--accent-2); border-color: rgba(155, 94, 46, 0.28); }
+
+    .points {
+      position: absolute;
+      inset: auto 20px 18px 20px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 7px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.52;
+    }
+
+    .dot:nth-child(3n) { background: var(--accent-2); }
+    .dot:nth-child(4n) { opacity: 0.28; }
+
+    .visual-caption {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    section {
+      padding: 46px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .section-note {
+      max-width: 600px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      background: var(--panel);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .metric-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .metric-table th,
+    .metric-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .metric-table th {
+      color: var(--muted);
+      background: #f2f5ee;
+      font-weight: 720;
+    }
+
+    .metric-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    code,
+    pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      color: #f3f7ef;
+      background: var(--code);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: var(--soft);
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .pill.alt {
+      color: var(--accent-2);
+      background: var(--soft-2);
+    }
+
+    footer {
+      padding: 34px 0 46px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        width: min(100% - 28px, 1120px);
+      }
+
+      .links {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 46px;
+      }
+
+      .hero-grid,
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .visual {
+        min-height: auto;
+        padding: 18px;
+      }
+
+      .tree-canvas {
+        height: 236px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-note {
+        margin-top: 10px;
+      }
+
+      .metric-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="shell nav" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="HDTree home">
+        <span class="mark">H</span>
+        <span>HDTree</span>
+      </a>
+      <div class="links">
+        <a href="#release">Release</a>
+        <a href="#results">Results</a>
+        <a href="#reproduce">Reproduce</a>
+        <a href="#citation">Citation</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">ICML reproducibility release</div>
+          <h1>HDTree</h1>
+          <p class="lead">
+            A minimal public release for reproducing the MNIST and Limb subsets of the HDTree experiments, with code, configs, logs, and pretrained checkpoints.
+          </p>
+          <div class="actions" aria-label="Project links">
+            <a class="button primary" href="https://github.com/zangzelin/code_HDTree_icml">Code</a>
+            <a class="button" href="https://huggingface.co/zelinzang/HDTree-ICML-checkpoints">Checkpoints</a>
+            <a class="button" href="https://github.com/zangzelin/code_HDTree_icml#training">Reproduce</a>
+            <a class="button" href="#citation">BibTeX</a>
+          </div>
+        </div>
+        <div class="visual" aria-label="HDTree schematic and release summary">
+          <div class="tree-canvas" role="img" aria-label="Hierarchical tree schematic over embedded samples">
+            <span class="branch b1"></span>
+            <span class="branch b2"></span>
+            <span class="branch b3"></span>
+            <span class="branch b4"></span>
+            <span class="branch b5"></span>
+            <span class="branch b6"></span>
+            <span class="node n0">root</span>
+            <span class="node n1">split</span>
+            <span class="node n2">split</span>
+            <span class="node n3">leaf</span>
+            <span class="node n4">leaf</span>
+            <span class="node n5">diffusion</span>
+            <div class="points" aria-hidden="true">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <p class="visual-caption">
+            Public artifacts cover the two maintained release targets: MNIST for image clustering and Limb for single-cell hierarchy evaluation.
+          </p>
+          <div class="pill-row">
+            <span class="pill">MNIST</span>
+            <span class="pill">Limb</span>
+            <span class="pill alt">PyTorch Lightning</span>
+            <span class="pill alt">offline W&amp;B logs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section id="release">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Release Scope</h2>
+          <p class="section-note">
+            This page tracks the public reproducibility package, not the full internal experiment suite.
+          </p>
+        </div>
+        <div class="grid-3">
+          <article class="card">
+            <h3>Included</h3>
+            <p>MNIST and Limb configurations, training scripts, validation scripts, preprocessing helper, and checkpoint metadata.</p>
+          </article>
+          <article class="card">
+            <h3>Checkpoints</h3>
+            <p>Pretrained MNIST and Limb checkpoints are hosted on Hugging Face with logs and SHA256 checksums.</p>
+          </article>
+          <article class="card">
+            <h3>Not Included</h3>
+            <p>Other paper datasets and lineage case studies are outside this minimal public release.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Checkpoint Metrics</h2>
+          <p class="section-note">
+            Values are representative single-run metrics from the released checkpoints and should not be read as multi-seed paper-table averages.
+          </p>
+        </div>
+        <table class="metric-table">
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>DP</th>
+              <th>LP</th>
+              <th>ACC</th>
+              <th>NMI</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MNIST</td>
+              <td>0.93262</td>
+              <td>0.97310</td>
+              <td>0.97310</td>
+              <td>0.92999</td>
+              <td>full training checkpoint</td>
+            </tr>
+            <tr>
+              <td>MNIST reconstruction validation</td>
+              <td>0.93454</td>
+              <td>0.97380</td>
+              <td>0.97380</td>
+              <td>0.93277</td>
+              <td>7000 validation samples, reconstruction loss 44.97935, log likelihood -13.98696</td>
+            </tr>
+            <tr>
+              <td>Limb</td>
+              <td>0.41029</td>
+              <td>0.58370</td>
+              <td>0.52860</td>
+              <td>0.49042</td>
+              <td>K=10, batch size 1000, exaggeration 0.5, nu 0.3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reproduce">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Reproduce</h2>
+          <p class="section-note">
+            The repository README contains complete setup, data placement, training, and checkpoint validation instructions.
+          </p>
+        </div>
+        <div class="grid-2">
+          <pre><code>pip install -r requirements.txt
+scripts/smoke_test.sh
+scripts/train_mnist.sh
+scripts/train_limb.sh</code></pre>
+          <pre><code>pip install huggingface_hub
+huggingface-cli download zelinzang/HDTree-ICML-checkpoints --local-dir .
+scripts/validate_checkpoint.sh mnist checkpoints/mnist/hdtree_mnist_best_epoch59_acc0.97570.pth</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Citation</h2>
+          <p class="section-note">
+            Use the repository citation file for the most current metadata.
+          </p>
+        </div>
+        <pre><code>@misc{hdtree2026,
+  title = {HDTree: Hierarchical Diffusion Tree},
+  author = {Zang, Zelin and collaborators},
+  year = {2026},
+  note = {ICML reproducibility release},
+  url = {https://github.com/zangzelin/code_HDTree_icml}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      HDTree public release: <a href="https://github.com/zangzelin/code_HDTree_icml">GitHub</a> ·
+      <a href="https://huggingface.co/zelinzang/HDTree-ICML-checkpoints">Hugging Face checkpoints</a>
+    </div>
+  </footer>
+</body>
+</html>
