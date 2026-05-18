@@ -89,6 +89,28 @@ data/
 
 The default configs log clustering and tree metrics every 20 epochs after validation.
 
+## Pretrained Checkpoints
+
+Pretrained MNIST and Limb checkpoints are hosted on Hugging Face:
+
+```text
+https://huggingface.co/zelinzang/HDTree-ICML-checkpoints
+```
+
+Download all released checkpoints and logs with:
+
+```bash
+pip install huggingface_hub
+huggingface-cli download zelinzang/HDTree-ICML-checkpoints --local-dir .
+```
+
+The release currently includes:
+
+```text
+checkpoints/mnist/hdtree_mnist_best_epoch59_acc0.97570.pth
+checkpoints/limb/hdtree_limb_i10_epoch199_acc0.53921.pth
+```
+
 ## Checkpoint Validation
 
 Validate a trained checkpoint:
