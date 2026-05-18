@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the HDTree paper."
+title: "HDTree ICML Reproducibility Code"
+authors:
+  - family-names: "Zang"
+    given-names: "Zelin"
+year: 2026
+repository-code: "ssh://git@www.zangzelin.fun:8084/zzl/hdtree_icml_code.git"
+license: "MIT"

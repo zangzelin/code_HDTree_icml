@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+
+data/
+save_near_index/
+save_output/
+checkpoints/
+wandb/
+logs/
+
+*.ckpt
+*.pth
+*.npy
+*.h5ad
