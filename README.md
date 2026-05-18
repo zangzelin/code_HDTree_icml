@@ -1,11 +1,16 @@
 # HDTree ICML Reproducibility Code
 
+[![Checkpoints](https://img.shields.io/badge/Hugging%20Face-checkpoints-yellow)](https://huggingface.co/zelinzang/HDTree-ICML-checkpoints)
+
 This repository is a minimal public release for reproducing the HDTree ICML experiments on two datasets:
 
 - MNIST
 - Limb single-cell data
 
 The code keeps the original training/evaluation path used for the reported runs, but removes lab-specific absolute paths from the public configuration.
+
+Pretrained MNIST and Limb checkpoints are available on Hugging Face:
+[`zelinzang/HDTree-ICML-checkpoints`](https://huggingface.co/zelinzang/HDTree-ICML-checkpoints).
 
 ## Environment
 
