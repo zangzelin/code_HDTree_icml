@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HDTree | ICML 2026</title>
+  <meta name="description" content="HDTree: Generative Modeling of Cellular Hierarchies for Robust Lineage Inference. ICML 2026 paper project page with method figures, results, code, and checkpoints.">
+  <style>
+    :root {
+      --bg: #f8f8f5;
+      --panel: #ffffff;
+      --ink: #111411;
+      --muted: #555d55;
+      --line: #dfe3db;
+      --accent: #176b5b;
+      --accent-2: #8f5630;
+      --soft: #e7f0ec;
+      --soft-2: #f3eadf;
+      --code: #1d231f;
+      --shadow: 0 18px 45px rgba(20, 28, 22, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.58;
+    }
+    a { color: inherit; }
+    .shell { width: min(1160px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-bottom: 1px solid rgba(223, 227, 219, 0.9);
+      background: rgba(248, 248, 245, 0.94);
+      backdrop-filter: blur(14px);
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 760; text-decoration: none; }
+    .mark { width: 32px; height: 32px; display: grid; place-items: center; color: #fff; background: var(--accent); border-radius: 7px; font-weight: 800; }
+    .links { display: flex; align-items: center; gap: 20px; color: var(--muted); font-size: 14px; }
+    .links a { text-decoration: none; }
+
+    .hero { padding: 76px 0 48px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 0.98fr) minmax(420px, 1.02fr); gap: 48px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-size: 13px; font-weight: 760; text-transform: uppercase; letter-spacing: 0.08em; }
+    h1 { margin: 14px 0 16px; max-width: 860px; font-size: clamp(42px, 5.8vw, 78px); line-height: 0.98; letter-spacing: 0; }
+    .subtitle { margin: 0 0 18px; max-width: 760px; font-size: 23px; line-height: 1.24; font-weight: 650; color: #27302a; }
+    .lead { max-width: 740px; color: var(--muted); font-size: 18px; }
+    .authors { margin-top: 18px; color: var(--muted); font-size: 14px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #fff; font-size: 14px; font-weight: 720; text-decoration: none; white-space: nowrap; }
+    .button.primary { color: #fff; border-color: var(--accent); background: var(--accent); }
+
+    .hero-figure { border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: var(--shadow); overflow: hidden; }
+    .hero-figure img, .paper-figure img { display: block; width: 100%; height: auto; }
+    .caption { margin: 0; padding: 13px 16px 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+
+    section { padding: 48px 0; border-top: 1px solid var(--line); }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 30px; margin-bottom: 24px; }
+    h2 { margin: 0; font-size: 30px; line-height: 1.12; letter-spacing: 0; }
+    .section-note { max-width: 660px; margin: 0; color: var(--muted); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 22px; background: var(--panel); }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); }
+    .paper-figure { border: 1px solid var(--line); border-radius: 8px; background: #fff; overflow: hidden; }
+    .figure-stack { display: grid; gap: 16px; }
+    .metric-table { width: 100%; border-collapse: collapse; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    .metric-table th, .metric-table td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; font-size: 14px; }
+    .metric-table th { color: var(--muted); background: #f1f4ef; font-weight: 720; }
+    .metric-table tr:last-child td { border-bottom: 0; }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    pre { margin: 0; padding: 18px; overflow-x: auto; color: #f3f7ef; background: var(--code); border-radius: 8px; font-size: 13px; line-height: 1.58; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .pill { padding: 6px 10px; border-radius: 999px; color: var(--accent); background: var(--soft); font-size: 13px; font-weight: 720; }
+    .pill.alt { color: var(--accent-2); background: var(--soft-2); }
+    footer { padding: 34px 0 46px; color: var(--muted); font-size: 14px; }
+
+    @media (max-width: 900px) {
+      .shell { width: min(100% - 28px, 1160px); }
+      .links { display: none; }
+      .hero { padding-top: 46px; }
+      .hero-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-note { margin-top: 10px; }
+      .metric-table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="shell nav" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="HDTree home"><span class="mark">H</span><span>HDTree</span></a>
+      <div class="links">
+        <a href="#paper">Paper</a>
+        <a href="#method">Method</a>
+        <a href="#figures">Figures</a>
+        <a href="#results">Results</a>
+        <a href="#links">Links</a>
+        <a href="#release">Release</a>
+        <a href="#citation">Citation</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">ICML 2026 accepted paper</div>
+          <h1>HDTree</h1>
+          <p class="subtitle">Generative Modeling of Cellular Hierarchies for Robust Lineage Inference</p>
+          <p class="lead">HDTree learns tree-structured latent representations with a unified hierarchical codebook and validates inferred cell lineages through diffusion-based generation conditioned on hierarchical paths.</p>
+          <p class="authors">Zelin Zang, WenZhe Li, Yongjie Xu, Chang Yu, Changxi Chi, Jingbo Zhou, Zhen Lei, Stan Z. Li</p>
+          <div class="actions" aria-label="Project links">
+            <a class="button primary" href="https://github.com/zangzelin/code_HDTree_icml">Code</a>
+            <a class="button" href="https://huggingface.co/zelinzang/HDTree-ICML-checkpoints">Checkpoints</a>
+            <a class="button" href="#figures">Paper Figures</a>
+            <a class="button" href="#links">Media</a>
+            <a class="button" href="#citation">BibTeX</a>
+          </div>
+        </div>
+        <figure class="hero-figure">
+          <img src="assets/paper/framework.png" alt="HDTree framework overview: encoder, hierarchical tree codebook, diffusion decoder, and lineage analysis.">
+          <figcaption class="caption">HDTree combines semantic encoding, a Hierarchical Tree Codebook, and a diffusion decoder for tree-conditioned generative validation and lineage analysis.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <section id="paper">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Paper Overview</h2>
+          <p class="section-note">The paper studies hierarchical representation learning for cellular differentiation, where the goal is not only to cluster cells but also to infer robust developmental trajectories and validate them generatively.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><h3>Unified Hierarchical Codebook</h3><p>A shared vector-quantized tree codebook avoids branch-specific neural modules and decouples tree depth from network size.</p></article>
+          <article class="card"><h3>Diffusion-Based Validation</h3><p>A path-conditioned diffusion decoder reconstructs and generates samples along learned hierarchical trajectories.</p></article>
+          <article class="card"><h3>Lineage Inference</h3><p>The learned tree is transformed into a weighted graph, enabling shortest-path inference between progenitor and differentiated states.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="method">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Motivation</h2>
+          <p class="section-note">Existing hierarchical methods either lack generative validation or rely on branch-specific modules that become unstable for deep or sparse hierarchies.</p>
+        </div>
+        <figure class="paper-figure">
+          <img src="assets/paper/motivation.png" alt="Motivation comparing hierarchical clustering, deep tree generation models, and HDTree.">
+          <figcaption class="caption">Motivation. HDTree is designed to improve stability, generativity, accuracy, and training scalability for hierarchical modeling.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="figures">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Paper Figures</h2>
+          <p class="section-note">Representative figures from the paper: the model architecture, lineage inference case study, and tree-conditioned generation.</p>
+        </div>
+        <div class="figure-stack">
+          <figure class="paper-figure">
+            <img src="assets/paper/framework.png" alt="HDTree method overview.">
+            <figcaption class="caption">Method overview. Encoder, Hierarchical Tree Codebook, and diffusion decoder are optimized with SCL, HQL, and DDP losses.</figcaption>
+          </figure>
+          <figure class="paper-figure">
+            <img src="assets/paper/lineage_case_study.png" alt="TreeVAE versus HDTree lineage visualization on C. elegans.">
+            <figcaption class="caption">Lineage case study. HDTree produces lineage structures that better align with developmental-time ground truth than TreeVAE.</figcaption>
+          </figure>
+          <figure class="paper-figure">
+            <img src="assets/paper/generative_validation.png" alt="HDTree generative validation on MNIST and C. elegans.">
+            <figcaption class="caption">Generative validation. HDTree simulates transitions along learned paths on MNIST and C. elegans.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Representative Results</h2>
+          <p class="section-note">The paper evaluates tree performance, clustering performance, reconstruction, lineage alignment, ablations, and computational cost across general and single-cell datasets.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><h3>General Benchmarks</h3><p>On MNIST, HDTree reports DP 91.9, LP 96.6, ACC 96.6, and NMI 92.4, while improving reconstruction metrics over TreeVAE.</p></article>
+          <article class="card"><h3>Single-Cell Benchmarks</h3><p>On Limb, HDTree reaches DP 41.0, LP 57.2, ACC 55.0, and NMI 46.6 under the paper evaluation setting.</p></article>
+          <article class="card"><h3>Lineage Ground Truth</h3><p>On C. elegans, HDTree improves temporal-neighborhood consistency over TreeVAE by more than 4 points in later developmental windows.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="links">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Links & Media</h2>
+          <p class="section-note">Pointers to the paper discussion, public artifacts, and outreach material. The OpenReview entry will be linked here once the public forum page is available.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card">
+            <h3>ICML 2026</h3>
+            <p><a href="https://icml.cc/Conferences/2026">Official conference page</a> for the Forty-third International Conference on Machine Learning.</p>
+          </article>
+          <article class="card">
+            <h3>OpenReview Venue</h3>
+            <p><a href="https://openreview.net/group?id=ICML.cc/2026/Conference">ICML 2026 OpenReview venue</a>. The HDTree paper forum link will be added once it is public.</p>
+          </article>
+          <article class="card">
+            <h3>Accepted Authors</h3>
+            <p><a href="https://openreview.net/group?id=ICML.cc/2026/Conference/Authors/Accepted">ICML 2026 accepted-authors group</a> on OpenReview.</p>
+          </article>
+          <article class="card">
+            <h3>Zhihu Article</h3>
+            <p><a href="https://github.com/zangzelin/code_HDTree_icml/blob/main/docs/zhihu_release_article.md">Chinese technical article draft</a> introducing the HDTree paper, method, figures, and experiments.</p>
+          </article>
+          <article class="card">
+            <h3>Hugging Face</h3>
+            <p><a href="https://huggingface.co/zelinzang/HDTree-ICML-checkpoints">Released MNIST and Limb checkpoints</a> with logs, checksums, and model-card notes.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="release">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Public Release</h2>
+          <p class="section-note">The public repository is a minimal reproducibility package for MNIST and Limb. Other paper datasets and lineage case studies are not included in this release.</p>
+        </div>
+        <table class="metric-table">
+          <thead><tr><th>Released checkpoint</th><th>DP</th><th>LP</th><th>ACC</th><th>NMI</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>MNIST</td><td>0.93262</td><td>0.97310</td><td>0.97310</td><td>0.92999</td><td>Representative single-run checkpoint</td></tr>
+            <tr><td>MNIST reconstruction validation</td><td>0.93454</td><td>0.97380</td><td>0.97380</td><td>0.93277</td><td>7000 validation samples, reconstruction loss 44.97935, log likelihood -13.98696</td></tr>
+            <tr><td>Limb</td><td>0.41029</td><td>0.58370</td><td>0.52860</td><td>0.49042</td><td>K=10, batch size 1000, exaggeration 0.5, nu 0.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reproduce">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Reproduce</h2>
+          <p class="section-note">The README contains full setup, data placement, training, and checkpoint validation instructions.</p>
+        </div>
+        <div class="grid-2">
+          <pre><code>pip install -r requirements.txt
+scripts/smoke_test.sh
+scripts/train_mnist.sh
+scripts/train_limb.sh</code></pre>
+          <pre><code>pip install huggingface_hub
+huggingface-cli download zelinzang/HDTree-ICML-checkpoints --local-dir .
+scripts/validate_checkpoint.sh mnist checkpoints/mnist/hdtree_mnist_best_epoch59_acc0.97570.pth</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Citation</h2>
+          <p class="section-note">Use the final proceedings citation when it becomes available.</p>
+        </div>
+        <pre><code>@inproceedings{zang2026hdtree,
+  title = {HDTree: Generative Modeling of Cellular Hierarchies for Robust Lineage Inference},
+  author = {Zang, Zelin and Li, WenZhe and Xu, Yongjie and Yu, Chang and Chi, Changxi and Zhou, Jingbo and Lei, Zhen and Li, Stan Z.},
+  booktitle = {International Conference on Machine Learning},
+  year = {2026},
+  url = {https://github.com/zangzelin/code_HDTree_icml}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">HDTree: ICML 2026 paper project page · <a href="https://github.com/zangzelin/code_HDTree_icml">GitHub</a> · <a href="https://huggingface.co/zelinzang/HDTree-ICML-checkpoints">Hugging Face checkpoints</a></div>
+  </footer>
+</body>
+</html>
