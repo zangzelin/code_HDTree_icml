@@ -2,12 +2,12 @@
 
 [![Checkpoints](https://img.shields.io/badge/Hugging%20Face-checkpoints-yellow)](https://huggingface.co/zelinzang/HDTree-ICML-checkpoints)
 
-This repository is a minimal public release for reproducing the HDTree ICML experiments on two datasets:
+This repository is a minimal public release for reproducing the MNIST and Limb subsets of the HDTree ICML experiments:
 
 - MNIST
 - Limb single-cell data
 
-The code keeps the original training/evaluation path used for the reported runs, but removes lab-specific absolute paths from the public configuration.
+The code keeps the original training/evaluation path used for the reported runs, but removes lab-specific absolute paths from the public configuration. Other datasets and lineage case studies from the paper are not included in this minimal release.
 
 Pretrained MNIST and Limb checkpoints are available on Hugging Face:
 [`zelinzang/HDTree-ICML-checkpoints`](https://huggingface.co/zelinzang/HDTree-ICML-checkpoints).
@@ -134,7 +134,7 @@ python main.py validate \
   --model.init_args.gen_data_bool=True
 ```
 
-In the internal MNIST run, full training produced:
+The released MNIST checkpoint corresponds to a representative single run with the public MNIST configuration. Full training produced:
 
 ```text
 tree/dp_0          0.93262
@@ -143,7 +143,7 @@ tree/cluster_acc_0 0.97310
 tree/nmi_0         0.92999
 ```
 
-The separate reconstruction validation with `gen_data_bool=True` on 7000 MNIST validation samples produced:
+For the same MNIST checkpoint, a separate reconstruction validation with `gen_data_bool=True` on 7000 MNIST validation samples produced:
 
 ```text
 tree/reconstruction_loss_0 44.97935
@@ -154,7 +154,7 @@ tree/cluster_acc_0         0.97380
 tree/nmi_0                 0.93277
 ```
 
-For Limb, the public default config corresponds to the sweep run
+The released Limb checkpoint corresponds to a representative single run with the public Limb configuration:
 `K=10, batch_size=1000, exaggeration_lat=0.5, nu_lat=0.3`. It produced:
 
 ```text
@@ -164,7 +164,7 @@ tree/cluster_acc_0 0.52860
 tree/nmi_0         0.49042
 ```
 
-This setting was selected as the public default because it improved the tree metrics (`DP`, `LP`, `NMI`) over the highest-ACC Limb sweep setting. If optimizing only for clustering accuracy, the alternative `batch_size=2000, nu_lat=0.5` reached `tree/cluster_acc_0=0.54190`.
+This setting was selected as the public default because it improved the tree metrics (`DP`, `LP`, `NMI`) over the highest-ACC Limb sweep setting. If optimizing only for clustering accuracy in this sweep, the alternative `batch_size=2000, nu_lat=0.5` reached `tree/cluster_acc_0=0.54190`. These checkpoint metrics are single-run values and should not be read as the multi-seed averages reported in the paper tables.
 
 ## Repository Layout
 
